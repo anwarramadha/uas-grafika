@@ -5,11 +5,14 @@
 import numpy as np
 from glumpy import app, gl, glm, gloo, data
 from glumpy.geometry import colorcube
-from glumpy.transforms import Trackball, Position
+from glumpy.transforms import *
 from os.path import abspath
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 vertex = """
 uniform vec4 u_color;
+uniform mat4 view;
 attribute vec3 position;
 attribute vec4 color;
 varying vec4 v_color;
@@ -18,7 +21,7 @@ void main()
 {
     v_color = u_color * color;
     v_texcoord = position;
-    gl_Position = <transform>;
+    gl_Position = view * <transform>;
 }
 """
 
@@ -48,6 +51,7 @@ for i in range(0, 2):
     texture.interpolation = gl.GL_LINEAR
     textures.append(texture)
 
+view = np.eye(4,dtype=np.float32)
 
 textures[0][2] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
 textures[0][3] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
@@ -72,6 +76,7 @@ def init_all_cubes(data):
         cube = gloo.Program(vertex, fragment)
         cube.bind(vertices)
         cube['transform'] = Trackball(Position("position"))
+        cube['view'] = view;
         window.attach(cube['transform'])
         CUBES.append(cube)
         VIO.append((vertices, faces, outline))
@@ -87,7 +92,6 @@ def custom_cube(x, y, height, width):
         # width
         if t[1] == 1:
             t[1] = width
-    print(vertices)
     return vertices, faces, outline
 
 def color_all_cubes():
@@ -118,11 +122,37 @@ def on_draw(dt):
     # cube2['u_color'] = 0, 0, 0, 1
     # cube2.draw(gl.GL_LINES, outline)
     # gl.glDepthMask(gl.GL_TRUE)
+
+zoom = PanZoom(Position("position"), aspect=1, zoom = 1)
+
 @window.event
 def on_key_press(key, modifiers):
-    global phi, theta
+    global CUBES, zoom, window
+    print(CUBES[0]['transform'])
     if key == app.window.key.UP:
-        glm.translate(CUBES[0], 0, 0, 0.1)
+        for cube in CUBES:
+            glm.translate(view, 0, -0.01, 0)
+            cube['view'] = view
+    if key == app.window.key.DOWN:
+        for cube in CUBES:
+            glm.translate(view, 0, 0.01, 0)
+            cube['view'] = view
+    if key == app.window.key.LEFT:
+        for cube in CUBES:
+            glm.translate(view, 0.01, 0,0 )
+            cube['view'] = view
+    if key == app.window.key.RIGHT:
+        for cube in CUBES:
+            glm.translate(view, -0.01, 0,0)
+            cube['view'] = view
+    if key == 87:
+        for cube in CUBES:
+            glm.translate(view, 0, 0,0.01)
+            cube['view'] = view
+    if key == 83:
+        for cube in CUBES:
+            glm.translate(view, 0, 0,-0.01)
+            cube['view'] = view
 
 # Build cube data
 data = [
