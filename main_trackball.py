@@ -155,9 +155,25 @@ def on_key_press(key, modifiers):
             cube['view'] = view
 
 # Build cube data
-data = [
-    (-2, 0, 1, 2),
-    (1, 0, 2, 1)]
+
+data = []
+with open("datagedung.txt") as f:
+	idxLine = 5
+	tup = []
+	for line in f:
+		if (idxLine == 5):
+			idxLine = 0
+			if tup:
+				data.append(tuple(tup))
+				del tup[:]
+		else:
+			idxLine = idxLine + 1
+			tup.append(f)
+
+	if tup:
+		data.append(tuple(tup))
+		del tup[:]
+
 init_all_cubes(data)
 
 # OpenGL initalization
