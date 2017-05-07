@@ -178,7 +178,7 @@ with open("datagedung.txt") as f:
 				del tup[:]
 		else:
 			idxLine = idxLine + 1
-			tup.append(f)
+			tup.append(float(line))
 
 	if tup:
 		data.append(tuple(tup))
