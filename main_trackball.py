@@ -125,9 +125,25 @@ def on_key_press(key, modifiers):
         glm.translate(CUBES[0], 0, 0, 0.1)
 
 # Build cube data
-data = [
-    (-2, 0, 1, 2),
-    (1, 0, 2, 1)]
+
+data = []
+with open("datagedung.txt") as f:
+	idxLine = 5
+	tup = []
+	for line in f:
+		if (idxLine == 5):
+			idxLine = 0
+			if tup:
+				data.append(tuple(tup))
+				del tup[:]
+		else:
+			idxLine = idxLine + 1
+			tup.append(float(line))
+
+	if tup:
+		data.append(tuple(tup))
+		del tup[:]
+
 init_all_cubes(data)
 
 # OpenGL initalization
