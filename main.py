@@ -8,15 +8,15 @@ from glumpy.geometry import colorcube
 from glumpy.transforms import PVMProjection, Position
 
 vertex = """
-uniform vec4 u_color;
-attribute vec3 position;
-attribute vec4 color;
-varying vec4 v_color;
-void main()
-{
-    v_color = u_color * color;
-    gl_Position = <transform>;
-}
+    uniform vec4 u_color;
+    attribute vec3 position;
+    attribute vec4 color;
+    varying vec4 v_color;
+    void main()
+    {
+        v_color = u_color * color;
+        gl_Position = <transform>;
+    }
 """
 
 fragment = """
@@ -29,6 +29,7 @@ void main()
 
 window = app.Window(width=1024, height=1024,
                     color=(0.30, 0.30, 0.35, 1.00))
+
 
 @window.event
 def on_draw(dt):
@@ -51,22 +52,23 @@ def on_draw(dt):
     cube.draw(gl.GL_LINES, outline)
     gl.glDepthMask(gl.GL_TRUE)
 
+
 @window.event
 def on_key_press(key, modifiers):
     global phi, theta
 
     if key == app.window.key.PAGEUP:
         # Make cube rotate
-        theta += 0.5 # degrees
-        phi += 0.5 # degrees
+        theta += 0.5  # degrees
+        phi += 0.5  # degrees
         model = np.eye(4, dtype=np.float32)
         glm.rotate(model, theta, 0, 0, 1)
         glm.rotate(model, phi, 0, 1, 0)
         transform['model'] = model
     elif key == app.window.key.PAGEDOWN:
         # Make cube rotate
-        theta -= 0.5 # degrees
-        phi -= 0.5 # degrees
+        theta -= 0.5  # degrees
+        phi -= 0.5  # degrees
         model = np.eye(4, dtype=np.float32)
         glm.rotate(model, theta, 0, 0, 1)
         glm.rotate(model, phi, 0, 1, 0)
@@ -84,8 +86,8 @@ def on_key_press(key, modifiers):
 # Build cube data
 V, I, O = colorcube()
 vertices = V.view(gloo.VertexBuffer)
-faces    = I.view(gloo.IndexBuffer)
-outline  = O.view(gloo.IndexBuffer)
+faces = I.view(gloo.IndexBuffer)
+outline = O.view(gloo.IndexBuffer)
 
 cube = gloo.Program(vertex, fragment)
 cube.bind(vertices)

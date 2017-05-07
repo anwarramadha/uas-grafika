@@ -9,6 +9,7 @@ from glumpy.transforms import Trackball, Position
 from os.path import abspath
 
 vertex = """
+<<<<<<< HEAD
 uniform vec4 u_color;
 attribute vec3 position;
 attribute vec4 color;
@@ -32,6 +33,37 @@ void main()
     vec4 v_color = textureCube(u_texture, v_texcoord);
     gl_FragColor = v_color;
 }
+=======
+    uniform vec4 u_color;
+    uniform mat4 view;
+    attribute vec3 position;
+    attribute vec4 color;
+    attribute vec3 a_normal;
+    varying vec3 v_normal;
+    varying vec4 v_color;
+    varying vec3   v_tex_coord;  // Interpolated fragment texture coordinates (out)
+    void main()
+    {
+        v_normal = a_normal;
+        v_color = u_color * color;
+        v_tex_coord = position;
+        gl_Position = view * <transform>;
+    }
+"""
+
+fragment = """
+    varying vec4 v_color;
+    varying vec3      v_tex_coord;        // Interpolated fragment texture coordinates (out)
+    varying vec3      v_normal;          // Interpolated normal (out)
+    uniform samplerCube u_texture;       // Texture
+    void main()
+    {
+        vec3 light_source = normalize(vec3(1,0.6,0.8)).xyz;
+        float brightness = dot(v_normal, light_source);
+        vec4 v_color = textureCube(u_texture, v_tex_coord);
+        gl_FragColor = v_color*(0.7 + 0.5*brightness);
+    }
+>>>>>>> dcd160be97e5d5e02493921e752b62cb6379e5f6
 """
 
 window = app.Window(width=1024, height=1024,
@@ -56,7 +88,7 @@ GEDUNG = ['Building/P_20170505_102534.jpg', 'Building/P_20170505_102404.jpg', 'B
 textures = []
 
 for i in range(0, 38):
-    texture = np.zeros((6,1024,1024,3),dtype=np.float32).view(gloo.TextureCube)
+    texture = np.zeros((6, 1024, 1024, 3), dtype=np.float32).view(gloo.TextureCube)
     texture.interpolation = gl.GL_LINEAR
     for j in range(0, 6):
         try:
@@ -65,6 +97,7 @@ for i in range(0, 38):
             print(GEDUNG[i])
     textures.append(texture)
 
+view = np.eye(4, dtype=np.float32)
 def init_all_cubes(data):
     global window, CUBES, vertex, fragment
 
@@ -74,6 +107,7 @@ def init_all_cubes(data):
         cube = gloo.Program(vertex, fragment)
         cube.bind(vertices)
         cube['transform'] = Trackball(Position("position"))
+        cube['view'] = view
         window.attach(cube['transform'])
         CUBES.append(cube)
         VIO.append((vertices, faces, outline))
@@ -94,14 +128,16 @@ def custom_cube(x, y, height, width):
     print(vertices)
     return vertices, faces, outline
 
+
 def color_all_cubes():
     global CUBES, VIO
-    i = 0
+    j = 0
     for index, cube in enumerate(CUBES):
-        cube['u_texture'] = textures[i]
+        cube['u_texture'] = textures[j]
         # cube['texture'] = data_glumpy.get(abspath("lena.jpg"))/255.
-        i+=1
+        j += 1
         cube.draw(gl.GL_TRIANGLES, VIO[index][1])
+
 
 @window.event
 def on_draw(dt):
@@ -122,11 +158,39 @@ def on_draw(dt):
     # cube2['u_color'] = 0, 0, 0, 1
     # cube2.draw(gl.GL_LINES, outline)
     # gl.glDepthMask(gl.GL_TRUE)
-@window.event
+
+
+zoom = PanZoom(Position("position"), aspect=1, zoom=1)
+
+
 def on_key_press(key, modifiers):
     global phi, theta
     if key == app.window.key.UP:
         glm.translate(CUBES[0], 0, 0, 0.1)
+        for cube in CUBES:
+            glm.translate(view, 0, -0.01, 0)
+            cube['view'] = view
+    if key == app.window.key.DOWN:
+        for cube in CUBES:
+            glm.translate(view, 0, 0.01, 0)
+            cube['view'] = view
+    if key == app.window.key.LEFT:
+        for cube in CUBES:
+            glm.translate(view, 0.01, 0, 0)
+            cube['view'] = view
+    if key == app.window.key.RIGHT:
+        for cube in CUBES:
+            glm.translate(view, -0.01, 0, 0)
+            cube['view'] = view
+    if key == 87:
+        for cube in CUBES:
+            glm.translate(view, 0, 0, 0.01)
+            cube['view'] = view
+    if key == 83:
+        for cube in CUBES:
+            glm.translate(view, 0, 0, -0.01)
+            cube['view'] = view
+
 
 # Build cube data
 
@@ -151,12 +215,15 @@ with open("datagedung.txt") as f:
 print(data)
 init_all_cubes(data)
 
-# OpenGL initalization
+# preparing normal
+for idx, cube in enumerate(CUBES):
+    cube['a_normal'] = [VIO[idx][0][i][2] for i in range(24)]
+
+# OpenGL initialization
 gl.glEnable(gl.GL_DEPTH_TEST)
 gl.glPolygonOffset(1, 1)
 gl.glEnable(gl.GL_LINE_SMOOTH)
 gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
-
 
 # Run
 app.run()
