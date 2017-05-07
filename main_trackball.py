@@ -3,7 +3,7 @@
 # Distributed under the (new) BSD License.
 # -----------------------------------------------------------------------------
 import numpy as np
-from glumpy import app, gl, glm, gloo, data as data_glumpy
+from glumpy import app, gl, glm, gloo, data
 from glumpy.geometry import colorcube
 from glumpy.transforms import Trackball, Position
 from os.path import abspath
@@ -13,17 +13,23 @@ uniform vec4 u_color;
 attribute vec3 position;
 attribute vec4 color;
 varying vec4 v_color;
+varying vec3   v_texcoord;  // Interpolated fragment texture coordinates (out)
 void main()
 {
     v_color = u_color * color;
+    v_texcoord = position;
     gl_Position = <transform>;
 }
 """
 
 fragment = """
 varying vec4 v_color;
+varying vec3      v_texcoord;        // Interpolated fragment texture coordinates (out)
+uniform samplerCube u_texture;       // Texture
 void main()
 {
+    
+    vec4 v_color = textureCube(u_texture, v_texcoord);
     gl_FragColor = v_color;
 }
 """
@@ -33,6 +39,29 @@ window = app.Window(width=1024, height=1024,
 
 CUBES = []
 VIO = []
+
+# Upload the texture data
+textures = []
+
+for i in range(0, 2):
+    texture = np.zeros((6,1024,1024,3),dtype=np.float32).view(gloo.TextureCube)
+    texture.interpolation = gl.GL_LINEAR
+    textures.append(texture)
+
+
+textures[0][2] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
+textures[0][3] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
+textures[0][0] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
+textures[0][1] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
+textures[0][4] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
+textures[0][5] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
+
+textures[1][2] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
+textures[1][3] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
+textures[1][0] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
+textures[1][1] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
+textures[1][4] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
+textures[1][5] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
 
 def init_all_cubes(data):
     global window, CUBES, vertex, fragment
@@ -46,6 +75,7 @@ def init_all_cubes(data):
         window.attach(cube['transform'])
         CUBES.append(cube)
         VIO.append((vertices, faces, outline))
+        # cube['u_texture'] = texture
 
 def custom_cube(x, y, height, width):
     vertices, faces, outline = colorcube()
@@ -62,9 +92,11 @@ def custom_cube(x, y, height, width):
 
 def color_all_cubes():
     global CUBES, VIO
+    i = 0
     for index, cube in enumerate(CUBES):
-        cube['u_color'] = 1, 1, 1, 1
+        cube['u_texture'] = textures[i]
         # cube['texture'] = data_glumpy.get(abspath("lena.jpg"))/255.
+        i+=1
         cube.draw(gl.GL_TRIANGLES, VIO[index][1])
 
 @window.event
