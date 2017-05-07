@@ -39,35 +39,37 @@ window = app.Window(width=1024, height=1024,
 
 CUBES = []
 VIO = []
-
+GEDUNG = ['Building/P_20170505_102534.jpg', 'Building/P_20170505_102404.jpg', 'Building/P_20170505_105104.jpg',
+            'Building/P_20170505_102534.jpg', 'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_105218.jpg',
+            'Building/P_20170505_105218.jpg', 'Building/P_20170505_104519_PN.jpg', 'Building/P_20170505_104519_PN.jpg',
+            'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_104051_PN.jpg',
+            'Building/P_20170505_103947_PN.jpg', 'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_104739_PN_2.jpg',
+            'Building/P_20170505_104739_PN_3.jpg', 'Building/P_20170505_104739_PN_3.jpg', 'Building/P_20170505_102705.jpg',
+            'Building/P_20170505_103244.jpg', 'Building/P_20170505_103227_PN.jpg', 'Building/P_20170505_102705.jpg',
+            'Building/P_20170505_102404.jpg', 'Building/P_20170505_102534.jpg', 'Building/P_20170505_102404.jpg',
+            'Building/P_20170505_102534.jpg', 'Building/P_20170505_102534.jpg', 'Building/P_20170505_104739_PN_3.jpg',
+            'Building/P_20170505_104739_PN_3.jpg', 'Building/P_20170505_102404.jpg', 'Building/P_20170505_105333.jpg',
+            'Building/P_20170505_105218.jpg','Building/P_20170505_105218.jpg', 'Building/P_20170505_105218.jpg',
+            'Building/P_20170505_104739_PN_3.jpg', 'Building/P_20170505_103244.jpg', 'Building/P_20170505_103207.jpg',
+            'Building/P_20170505_104739_PN_3.jpg', 'Building/P_20170505_104739_PN_3.jpg']
 # Upload the texture data
 textures = []
 
-for i in range(0, 2):
+for i in range(0, 38):
     texture = np.zeros((6,1024,1024,3),dtype=np.float32).view(gloo.TextureCube)
     texture.interpolation = gl.GL_LINEAR
+    for j in range(0, 6):
+        try:
+            texture[j] = data.get(abspath(GEDUNG[i]))/255.
+        except:
+            print(GEDUNG[i])
     textures.append(texture)
-
-
-textures[0][2] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
-textures[0][3] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
-textures[0][0] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
-textures[0][1] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
-textures[0][4] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
-textures[0][5] = data.get(abspath("FotoGedung/P_20170505_101510.jpg"))/255.
-
-textures[1][2] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
-textures[1][3] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
-textures[1][0] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
-textures[1][1] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
-textures[1][4] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
-textures[1][5] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
 
 def init_all_cubes(data):
     global window, CUBES, vertex, fragment
 
-    for x, y, height, width in data:
-        vertices, faces, outline = custom_cube(x, y, height, width)
+    for x, y, height, width, length in data:
+        vertices, faces, outline = custom_cube(x/92, y/15, height, width/34)
 
         cube = gloo.Program(vertex, fragment)
         cube.bind(vertices)
@@ -80,13 +82,15 @@ def init_all_cubes(data):
 def custom_cube(x, y, height, width):
     vertices, faces, outline = colorcube()
     for t in vertices['position']:
-        t[0] += x
+        if t[0] == 1:
+            t[0] = x
         # height
         if t[2] == 1:
             t[2] = height
         # width
         if t[1] == 1:
             t[1] = width
+
     print(vertices)
     return vertices, faces, outline
 
@@ -144,6 +148,7 @@ with open("datagedung.txt") as f:
 		data.append(tuple(tup))
 		del tup[:]
 
+print(data)
 init_all_cubes(data)
 
 # OpenGL initalization
