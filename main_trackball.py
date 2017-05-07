@@ -75,8 +75,8 @@ textures[1][5] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
 def init_all_cubes(data):
     global window, CUBES, vertex, fragment
 
-    for x, y, height, width in data:
-        vertices, faces, outline = custom_cube(x, y, height, width)
+    for x, y, height, width, length in data:
+        vertices, faces, outline = custom_cube(x, y, height, width, length)
 
         cube = gloo.Program(vertex, fragment)
         cube.bind(vertices)
@@ -87,16 +87,21 @@ def init_all_cubes(data):
         VIO.append((vertices, faces, outline))
         # cube['u_texture'] = texture
 
-def custom_cube(x, y, height, width):
+def custom_cube(x, y, height, width, length):
     vertices, faces, outline = colorcube()
     for t in vertices['position']:
         t[0] += x
+        t[1] += y
+
         # height
         if t[2] == 1:
             t[2] = height
         # width
         if t[1] == 1:
             t[1] = width
+        # length
+        if t[0] == 1:
+            t[0] = length
     return vertices, faces, outline
 
 def color_all_cubes():
