@@ -15,10 +15,13 @@ uniform vec4 u_color;
 uniform mat4 view;
 attribute vec3 position;
 attribute vec4 color;
+attribute vec3 a_normal;
+varying vec3 v_normal;
 varying vec4 v_color;
 varying vec3   v_texcoord;  // Interpolated fragment texture coordinates (out)
 void main()
 {
+	v_normal = a_normal;
     v_color = u_color * color;
     v_texcoord = position;
     gl_Position = view * <transform>;
@@ -28,12 +31,14 @@ void main()
 fragment = """
 varying vec4 v_color;
 varying vec3      v_texcoord;        // Interpolated fragment texture coordinates (out)
+varying vec3      v_normal;          // Interpolated normal (out)
 uniform samplerCube u_texture;       // Texture
 void main()
 {
-    
+    vec3 lightsource = normalize(vec3(1,0.6,0.8)).xyz;
+	float brightness = dot(v_normal, lightsource);
     vec4 v_color = textureCube(u_texture, v_texcoord);
-    gl_FragColor = v_color;
+    gl_FragColor = v_color*(0.7 + 0.5*brightness);
 }
 """
 
@@ -70,8 +75,8 @@ textures[1][5] = data.get(abspath("FotoGedung/P_20170502_115905.jpg"))/255.
 def init_all_cubes(data):
     global window, CUBES, vertex, fragment
 
-    for x, y, height, width in data:
-        vertices, faces, outline = custom_cube(x, y, height, width)
+    for x, y, height, width, length in data:
+        vertices, faces, outline = custom_cube(x, y, height, width, length)
 
         cube = gloo.Program(vertex, fragment)
         cube.bind(vertices)
@@ -82,16 +87,21 @@ def init_all_cubes(data):
         VIO.append((vertices, faces, outline))
         # cube['u_texture'] = texture
 
-def custom_cube(x, y, height, width):
+def custom_cube(x, y, height, width, length):
     vertices, faces, outline = colorcube()
     for t in vertices['position']:
         t[0] += x
+        t[1] += y
+
         # height
         if t[2] == 1:
             t[2] = height
         # width
         if t[1] == 1:
             t[1] = width
+        # length
+        if t[0] == 1:
+            t[0] = length
     return vertices, faces, outline
 
 def color_all_cubes():
@@ -155,10 +165,30 @@ def on_key_press(key, modifiers):
             cube['view'] = view
 
 # Build cube data
-data = [
-    (-2, 0, 1, 2),
-    (1, 0, 2, 1)]
+
+data = []
+with open("datagedung.txt") as f:
+	idxLine = 5
+	tup = []
+	for line in f:
+		if (idxLine == 5):
+			idxLine = 0
+			if tup:
+				data.append(tuple(tup))
+				del tup[:]
+		else:
+			idxLine = idxLine + 1
+			tup.append(f)
+
+	if tup:
+		data.append(tuple(tup))
+		del tup[:]
+
 init_all_cubes(data)
+
+#preparing normal
+for idx, cube in enumerate(CUBES):
+	cube['a_normal'] = [VIO[idx][0][i][2] for i in range(24)]
 
 # OpenGL initalization
 gl.glEnable(gl.GL_DEPTH_TEST)
