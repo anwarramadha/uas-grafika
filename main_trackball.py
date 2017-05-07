@@ -15,10 +15,13 @@ uniform vec4 u_color;
 uniform mat4 view;
 attribute vec3 position;
 attribute vec4 color;
+attribute vec3 a_normal;
+varying vec3 v_normal;
 varying vec4 v_color;
 varying vec3   v_texcoord;  // Interpolated fragment texture coordinates (out)
 void main()
 {
+	v_normal = a_normal;
     v_color = u_color * color;
     v_texcoord = position;
     gl_Position = view * <transform>;
@@ -28,12 +31,14 @@ void main()
 fragment = """
 varying vec4 v_color;
 varying vec3      v_texcoord;        // Interpolated fragment texture coordinates (out)
+varying vec3      v_normal;          // Interpolated normal (out)
 uniform samplerCube u_texture;       // Texture
 void main()
 {
-    
+    vec3 lightsource = normalize(vec3(1,0.6,0.8)).xyz;
+	float brightness = dot(v_normal, lightsource);
     vec4 v_color = textureCube(u_texture, v_texcoord);
-    gl_FragColor = v_color;
+    gl_FragColor = v_color*(0.7 + 0.5*brightness);
 }
 """
 
@@ -175,6 +180,10 @@ with open("datagedung.txt") as f:
 		del tup[:]
 
 init_all_cubes(data)
+
+#preparing normal
+for idx, cube in enumerate(CUBES):
+	cube['a_normal'] = [VIO[idx][0][i][2] for i in range(24)]
 
 # OpenGL initalization
 gl.glEnable(gl.GL_DEPTH_TEST)
