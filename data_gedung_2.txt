@@ -82,3 +82,57 @@
 4
 125
 60
+15. Gedung Perpus
+3
+40
+4
+130
+115
+16. Gedung Kimia
+8
+30
+4
+175
+55
+17. Gedung Lab Kimia Organik
+8
+25
+4
+200
+50
+18. Gedung Mesin
+-10
+30
+5
+100
+165
+19. Gedung Fisika
+-5
+5
+2
+105
+227
+20. Kompleks Penerbangan (atas mesin)
+-5
+40
+4
+90
+165
+21. Gedung CAS
+7
+40
+8
+170
+110
+22. Gedung Sipil
+-5
+1
+3
+30
+220
+23. Gedung PAU
+0
+40
+6
+150
+85
