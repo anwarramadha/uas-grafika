@@ -1,0 +1,84 @@
+1. Aula Timur
+3
+0
+2
+90
+154
+2. CC Timur
+3
+5
+2
+50
+140
+3. Aula Barat
+0
+0
+2
+90
+154
+4. CC Barat
+0
+5
+2
+50
+140
+5. Labtek 8
+3
+10
+4
+70
+240
+6. Labtek 7
+3
+15
+4
+70
+240
+7. Labtek 5
+0
+10
+4
+70
+240
+8. Labtek 6
+0
+15
+4
+70
+240
+9. Gedung PLN
+3
+25
+1
+55
+100
+10. Gedung Comlabs
+3
+30
+2
+85
+120
+11. Gedung TVST
+0
+25
+2
+95
+95
+12. Gedung Oktagon
+0
+30
+2
+95
+95
+13. GKU Barat
+-5
+15
+4
+95
+95
+14. GKU Timur
+8
+15
+4
+125
+60
