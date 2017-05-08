@@ -19,7 +19,7 @@ void main()
 {
     v_color = u_color * color;
     v_texcoord = position;
-    gl_Position = <transform>;
+    gl_Position = view * <transform>;
 }
 """
 
@@ -131,11 +131,10 @@ def on_draw(dt):
 
 zoom = PanZoom(Position("position"), aspect=1, zoom=1)
 
-
+@window.event
 def on_key_press(key, modifiers):
     global phi, theta
     if key == app.window.key.UP:
-        glm.translate(CUBES[0], 0, 0, 0.1)
         for cube in CUBES:
             glm.translate(view, 0, -0.01, 0)
             cube['view'] = view
@@ -164,7 +163,7 @@ def on_key_press(key, modifiers):
 # Build cube data
 
 data = []
-with open("data_gedung.txt") as f:
+with open("data_gedung_2.txt") as f:
 	idxLine = 5
 	tup = []
 	for line in f:
@@ -181,7 +180,6 @@ with open("data_gedung.txt") as f:
 		data.append(tuple(tup))
 		del tup[:]
 
-print(data)
 init_all_cubes(data)
 
 # preparing normal
