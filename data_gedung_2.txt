@@ -3,136 +3,136 @@
 0
 2
 90
-154
+1
 2. CC Timur
 3
 5
 2
 50
-140
+2
 3. Aula Barat
 0
 0
 2
 90
-154
+1
 4. CC Barat
 0
 5
 2
 50
-140
+2
 5. Labtek 8
 3
 10
 4
 70
-240
+4
 6. Labtek 7
 3
 15
 4
 70
-240
+4
 7. Labtek 5
 0
 10
 4
 70
-240
+4
 8. Labtek 6
 0
 15
 4
 70
-240
+4
 9. Gedung PLN
 3
 25
 1
 55
-100
+1
 10. Gedung Comlabs
 3
 30
 2
 85
-120
+1
 11. Gedung TVST
 0
 25
 2
 95
-95
+1
 12. Gedung Oktagon
 0
 30
 2
 95
-95
+1
 13. GKU Barat
 -5
 15
 4
 95
-95
+3
 14. GKU Timur
 8
 15
 4
 125
-60
+3
 15. Gedung Perpus
 3
 40
 4
 130
-115
+5
 16. Gedung Kimia
 8
 30
 4
 175
-55
+1
 17. Gedung Lab Kimia Organik
 8
 25
 4
 200
-50
+1
 18. Gedung Mesin
 -10
 30
 5
 100
-165
+1
 19. Gedung Fisika
 -5
 5
 2
 105
-227
+1
 20. Kompleks Penerbangan (atas mesin)
 -5
 40
 4
 90
-165
+1
 21. Gedung CAS
 7
 40
 8
 170
-110
+5
 22. Gedung Sipil
 -5
 1
 3
 30
-220
+1
 23. Gedung PAU
 0
 40
 6
 150
-85
+5

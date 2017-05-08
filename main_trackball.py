@@ -11,12 +11,15 @@ from os.path import abspath
 vertex = """
 uniform vec4 u_color;
 uniform mat4      view;            // View matrix
+attribute vec3 a_normal;
 attribute vec3 position;
 attribute vec4 color;
+varying vec3 v_normal;
 varying vec4 v_color;
 varying vec3   v_texcoord;  // Interpolated fragment texture coordinates (out)
 void main()
 {
+    v_normal = a_normal;
     v_color = u_color * color;
     v_texcoord = position;
     gl_Position = view * <transform>;
@@ -26,13 +29,15 @@ void main()
 fragment = """
 varying vec4 v_color;
 varying vec3      v_texcoord;        // Interpolated fragment texture coordinates (out)
+varying vec3 v_normal;
 uniform samplerCube u_texture;       // Texture
 uniform mat4      view;            // View matrix
 void main()
 {
-
+    vec3 lightsource = normalize(vec3(1,0.6,0.8)).xyz;
+	float brightness = dot(v_normal, lightsource);
     vec4 v_color = textureCube(u_texture, v_texcoord);
-    gl_FragColor = v_color;
+    gl_FragColor = v_color*(0.5 + 0.5*brightness);
 }
 """
 
@@ -41,7 +46,8 @@ window = app.Window(width=1024, height=1024,
 
 CUBES = []
 VIO = []
-GEDUNG = ['Building/P_20170505_102534.jpg', 'Building/P_20170505_102404.jpg', 'Building/P_20170505_105104.jpg',
+GEDUNG = ['Building/soil.jpg',
+            'Building/P_20170505_102534.jpg', 'Building/P_20170505_102404.jpg', 'Building/P_20170505_105104.jpg',
             'Building/P_20170505_102534.jpg', 'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_105218.jpg',
             'Building/P_20170505_105218.jpg', 'Building/P_20170505_104519_PN.jpg', 'Building/P_20170505_104519_PN.jpg',
             'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_104051_PN.jpg', 'Building/P_20170505_104051_PN.jpg',
@@ -71,8 +77,18 @@ view = np.eye(4, dtype=np.float32)
 def init_all_cubes(data):
     global window, CUBES, vertex, fragment
 
+    vertices, faces, outline = custom_cube_2(-1, -1, 1, 1, 1)
+
+    cube = gloo.Program(vertex, fragment)
+    cube.bind(vertices)
+    cube['transform'] = Trackball(Position("position"))
+    cube['view'] = view
+    window.attach(cube['transform'])
+    CUBES.append(cube)
+    VIO.append((vertices, faces, outline))
+
     for x, y, height, width, length in data:
-        vertices, faces, outline = custom_cube(x, y, height, width)
+        vertices, faces, outline = custom_cube(x, y, height, width, length)
 
         cube = gloo.Program(vertex, fragment)
         cube.bind(vertices)
@@ -83,7 +99,17 @@ def init_all_cubes(data):
         VIO.append((vertices, faces, outline))
         # cube['u_texture'] = texture
 
-def custom_cube(x, y, height, width):
+def custom_cube_2(x, y, height, width, length):
+    vertices, faces, outline = colorcube()
+    for t in vertices['position']:
+        t[0] *= 50
+        t[1] *= 50
+        t[2] = -1
+
+    print(vertices)
+    return vertices, faces, outline
+
+def custom_cube(x, y, height, width, length):
     vertices, faces, outline = colorcube()
     for t in vertices['position']:
         t[0] += x
@@ -94,8 +120,11 @@ def custom_cube(x, y, height, width):
         # # width
         # if t[1] == 1:
         #     t[1] = width
+        # width
+        if t[2] == 1:
+            t[2] = length
 
-    print(vertices)
+    # print(vertices)
     return vertices, faces, outline
 
 
@@ -117,6 +146,7 @@ def on_draw(dt):
     gl.glEnable(gl.GL_DEPTH_TEST)
     gl.glEnable(gl.GL_POLYGON_OFFSET_FILL)
     color_all_cubes()
+
 
     # Outlined cube
     # gl.glDisable(gl.GL_POLYGON_OFFSET_FILL)
@@ -183,14 +213,17 @@ with open("data_gedung_2.txt") as f:
 init_all_cubes(data)
 
 # preparing normal
-# for idx, cube in enumerate(CUBES):
-    # cube['a_normal'] = [VIO[idx][0][i][2] for i in range(24)]
+for idx, cube in enumerate(CUBES):
+    cube['a_normal'] = [VIO[idx][0][i][2] for i in range(24)]
 
 # OpenGL initialization
 gl.glEnable(gl.GL_DEPTH_TEST)
 gl.glPolygonOffset(1, 1)
 gl.glEnable(gl.GL_LINE_SMOOTH)
 gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+
+# quad['transform'] = Trackball(Position("position"))
+# window.attach(cube['transform'])
 
 # Run
 app.run()
